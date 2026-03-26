@@ -63,34 +63,32 @@
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| BIND-01 | — | Pending |
-| BIND-02 | — | Pending |
-| BIND-03 | — | Pending |
-| PKG-01 | — | Pending |
-| PKG-02 | — | Pending |
-| PKG-03 | — | Pending |
-| PKG-04 | — | Pending |
-| PKG-05 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
-| DOCS-03 | — | Pending |
-| DEMO-01 | — | Pending |
-| DEMO-02 | — | Pending |
-| REL-01 | — | Pending |
-| REL-02 | — | Pending |
-| REL-03 | — | Pending |
+| BIND-01 | Phase 1 | Pending |
+| BIND-02 | Phase 1 | Pending |
+| BIND-03 | Phase 1 | Pending |
+| PKG-01 | Phase 1 | Pending |
+| PKG-02 | Phase 2 | Pending |
+| PKG-03 | Phase 2 | Pending |
+| PKG-04 | Phase 4 | Pending |
+| PKG-05 | Phase 2 | Pending |
+| TEST-01 | Phase 1 | Pending |
+| TEST-02 | Phase 3 | Pending |
+| DOCS-01 | Phase 4 | Pending |
+| DOCS-02 | Phase 4 | Pending |
+| DOCS-03 | Phase 4 | Pending |
+| DEMO-01 | Phase 5 | Pending |
+| DEMO-02 | Phase 5 | Pending |
+| REL-01 | Phase 6 | Pending |
+| REL-02 | Phase 3 | Pending |
+| REL-03 | Phase 6 | Pending |
 
 **Coverage:**
 - v1 requirements: 18 total
-- Mapped to phases: 0 (traceability filled by roadmap)
-- Unmapped: 18 ⚠️
+- Mapped to phases: 18
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-26*
-*Last updated: 2026-03-26 after initial definition*
+*Last updated: 2026-03-26 after roadmap creation*
