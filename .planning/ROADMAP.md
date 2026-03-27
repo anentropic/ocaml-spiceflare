@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md -- Core codegen fixes: cross-module type qualification, type parameter threading, forward-reference topo sort, stream type resolution
+- [x] 01-01-PLAN.md -- Core codegen fixes: cross-module type qualification, type parameter threading, forward-reference topo sort, stream type resolution
 - [ ] 01-02-PLAN.md -- Inheritance aliases (BIND-03) and Bind module generation (BIND-02)
 - [ ] 01-03-PLAN.md -- Melange infrastructure activation, test suite emission, regeneration, and compile verification
 

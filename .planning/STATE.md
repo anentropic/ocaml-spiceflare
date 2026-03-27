@@ -1,3 +1,17 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: Ready to execute
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-03-27T00:42:05.165Z"
+progress:
+  total_phases: 6
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
+---
+
 # Project State
 
 ## Project Reference
@@ -5,20 +19,17 @@
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** Consumers get up-to-date, idiomatic Melange bindings for the entire CF Workers API without hand-authoring or maintaining them
-**Current focus:** Phase 1: Compilable Bindings
+**Current focus:** Phase 01 — compilable-bindings
 
 ## Current Position
 
-Phase: 1 of 6 (Compilable Bindings)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-03-26 -- Roadmap created
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 01 (compilable-bindings) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 0
 - Average duration: -
 - Total execution time: 0 hours
@@ -30,10 +41,12 @@ Progress: [░░░░░░░░░░] 0%
 | - | - | - | - |
 
 **Recent Trend:**
+
 - Last 5 plans: -
 - Trend: -
 
 *Updated after each plan completion*
+| Phase 01-compilable-bindings P01 | 7min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -45,6 +58,9 @@ Recent decisions affecting current work:
 - [Roadmap]: BIND-01 + PKG-01 are the compile gate -- nothing else proceeds until bindings build under Melange
 - [Roadmap]: TEST-01 (compile-checking test suite) co-located with Phase 1 binding fixes, not deferred to a separate testing phase
 - [Roadmap]: PKG-05 version constraints set to ocaml >= 5.4 & < 5.5, melange >= 6.0.1 per research on OCaml 5.4 + Melange 6 compatibility
+- [Phase 01-compilable-bindings]: Used String.capitalize_ascii for dune file module names (not Naming.module_name_of) to match dune single-capitalize convention
+- [Phase 01-compilable-bindings]: Type params checked before is_known_decl in map_type to prevent generic parameters from misresolving as declarations
+- [Phase 01-compilable-bindings]: Topological sort cycles broken arbitrarily with stderr warning -- no OCaml mutual recursion support yet
 
 ### Pending Todos
 
@@ -58,6 +74,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-26
-Stopped at: Roadmap created, ready to plan Phase 1
+Last session: 2026-03-27T00:42:05.162Z
+Stopped at: Completed 01-01-PLAN.md
 Resume file: None
