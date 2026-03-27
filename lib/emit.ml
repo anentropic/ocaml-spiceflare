@@ -109,6 +109,11 @@ let pp_type_decl fmt = function
      | Some d -> pp fmt "(** %s *)@," d
      | None -> ());
     pp fmt "type %s" name
+  | Alias { name; target; doc } ->
+    (match doc with
+     | Some d -> pp fmt "(** %s *)@," d
+     | None -> ());
+    pp fmt "type %s = %a" name pp_type target
   | Record { name; fields; doc } ->
     (match doc with
      | Some d -> pp fmt "(** %s *)@," d

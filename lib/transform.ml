@@ -335,7 +335,18 @@ let transform_class env ~current_module (d : decl) : ocaml_module =
   let self_type = Tname "t" in
   let source_module = d.d_source_module in
   let type_params = d.d_type_params in
-  let type_item = Type (Abstract { name = "t"; doc = d.d_doc }) in
+  let type_item =
+    match d.d_extends with
+    | [ Ref { name = parent_name; args = [] } ]
+      when Resolve.is_known_decl env parent_name
+           && parent_name <> "Error"
+           && not (String.equal parent_name "Record") ->
+      let target = map_type env ~current_module ~type_params:d.d_type_params
+        (Ref { name = parent_name; args = [] }) in
+      Type (Alias { name = "t"; target; doc = d.d_doc })
+    | _ ->
+      Type (Abstract { name = "t"; doc = d.d_doc })
+  in
   let constructor_items =
     match find_constructor d.d_members with
     | Some overloads ->
@@ -357,8 +368,15 @@ let transform_class env ~current_module (d : decl) : ocaml_module =
 let transform_interface_input env ~current_module (d : decl) : ocaml_module =
   (* [@@mel.obj] constructor with optional labeled args *)
   let type_params = d.d_type_params in
-  let type_item =
-    Type (Warning_type { name = "t"; doc = d.d_doc })
+  (* Check for single-inheritance alias candidate *)
+  let is_alias_candidate =
+    match d.d_extends with
+    | [ Ref { name = parent_name; args = [] } ]
+      when Resolve.is_known_decl env parent_name
+           && parent_name <> "Error"
+           && not (String.equal parent_name "Record") ->
+      Some parent_name
+    | _ -> None
   in
   let params =
     List.filter_map
@@ -372,37 +390,61 @@ let transform_interface_input env ~current_module (d : decl) : ocaml_module =
          | Method _ -> None)
       d.d_members
   in
-  (* Add trailing unit for optional args *)
-  let has_optional =
-    List.exists
-      (fun m ->
-         match m with
-         | Property { optional = true; _ } -> true
-         | _ -> false)
-      d.d_members
-  in
-  let params =
-    if has_optional then params @ [ positional_param Tunit ]
-    else params
-  in
-  let make_ext =
-    External
-      {
-        e_name = "make";
-        e_js_name = "";
-        e_type = make_arrow params (Tname "t");
-        e_attrs = [ Mel_obj ];
-        e_doc = None;
-      }
-  in
-  {
-    m_name = Naming.module_name_of d.d_name;
-    m_items = [ type_item; make_ext ];
-  }
+  (* If no own members and extends a single parent, emit alias instead *)
+  match is_alias_candidate with
+  | Some parent_name when params = [] ->
+    let target = map_type env ~current_module ~type_params:d.d_type_params
+      (Ref { name = parent_name; args = [] }) in
+    let type_item = Type (Alias { name = "t"; target; doc = d.d_doc }) in
+    {
+      m_name = Naming.module_name_of d.d_name;
+      m_items = [ type_item ];
+    }
+  | _ ->
+    let type_item =
+      Type (Warning_type { name = "t"; doc = d.d_doc })
+    in
+    (* Add trailing unit for optional args *)
+    let has_optional =
+      List.exists
+        (fun m ->
+           match m with
+           | Property { optional = true; _ } -> true
+           | _ -> false)
+        d.d_members
+    in
+    let params =
+      if has_optional then params @ [ positional_param Tunit ]
+      else params
+    in
+    let make_ext =
+      External
+        {
+          e_name = "make";
+          e_js_name = "";
+          e_type = make_arrow params (Tname "t");
+          e_attrs = [ Mel_obj ];
+          e_doc = None;
+        }
+    in
+    {
+      m_name = Naming.module_name_of d.d_name;
+      m_items = [ type_item; make_ext ];
+    }
 
 let transform_interface_output env ~current_module (d : decl) : ocaml_module =
   (* Plain OCaml record *)
   let type_params = d.d_type_params in
+  (* Check for single-inheritance alias candidate *)
+  let is_alias_candidate =
+    match d.d_extends with
+    | [ Ref { name = parent_name; args = [] } ]
+      when Resolve.is_known_decl env parent_name
+           && parent_name <> "Error"
+           && not (String.equal parent_name "Record") ->
+      Some parent_name
+    | _ -> None
+  in
   let fields =
     List.filter_map
       (fun (m : Ir.member) ->
@@ -425,9 +467,15 @@ let transform_interface_output env ~current_module (d : decl) : ocaml_module =
       d.d_members
   in
   let type_item =
-    Type
-      (Record
-         { name = "t"; fields; doc = d.d_doc })
+    match is_alias_candidate with
+    | Some parent_name when fields = [] ->
+      (* No own fields, pure alias *)
+      let target = map_type env ~current_module ~type_params:d.d_type_params
+        (Ref { name = parent_name; args = [] }) in
+      Type (Alias { name = "t"; target; doc = d.d_doc })
+    | _ ->
+      (* Has own fields or no alias candidate -- keep as record *)
+      Type (Record { name = "t"; fields; doc = d.d_doc })
   in
   (* Also emit method bindings if the interface has methods *)
   let method_items =

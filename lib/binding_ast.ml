@@ -50,6 +50,7 @@ type external_decl = {
 (** Type declaration variants *)
 type type_decl =
   | Abstract of { name : string; doc : string option }
+  | Alias of { name : string; target : ocaml_type; doc : string option }
   | Record of {
       name : string;
       fields : record_field list;
