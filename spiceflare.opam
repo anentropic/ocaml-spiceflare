@@ -5,7 +5,7 @@ synopsis: "Cloudflare Workers Melange binding generator"
 description:
   "Generates Melange external binding declarations for the Cloudflare Workers runtime API surface from @cloudflare/workers-types."
 depends: [
-  "dune" {>= "3.16"}
+  "dune" {>= "3.18"}
   "ocaml" {>= "5.2"}
   "yojson" {>= "2.0"}
   "alcotest" {with-test & >= "1.7"}
@@ -25,3 +25,4 @@ build: [
     "@doc" {with-doc}
   ]
 ]
+x-maintenance-intent: ["(latest)"]

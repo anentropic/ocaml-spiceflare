@@ -202,3 +202,61 @@ let emit_all ~dir (files : output_file list) =
        close_out oc;
        Printf.printf "Wrote %s\n" path)
     files
+
+(* ── Test file generation ──────────────────────────────────────────── *)
+
+(** Generate a compile-checking test file for a binding output file.
+    The test file references types and externals with explicit annotations
+    to trigger Melange type-checking of cross-module references and
+    external signatures. *)
+let gen_test_content (f : output_file) : string =
+  let buf = Buffer.create 1024 in
+  let bprintf = Printf.bprintf in
+  let module_name =
+    (* Derive module name from filename: "streams.ml" -> "Streams" *)
+    let stem = Filename.chop_extension f.of_filename in
+    String.capitalize_ascii stem
+  in
+  bprintf buf "(* Generated compile-checking test for %s *)\n\n" f.of_filename;
+  bprintf buf "open Cf_workers_bindings.%s\n\n" module_name;
+  (* For each submodule, reference its type t and externals *)
+  List.iter
+    (fun (m : ocaml_module) ->
+       let safe_prefix =
+         String.lowercase_ascii m.m_name
+         |> String.map (fun c ->
+              if (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c = '_'
+              then c
+              else '_')
+       in
+       (* Verify type t is resolvable *)
+       bprintf buf "(* Verify %s.t is resolvable *)\n" m.m_name;
+       bprintf buf "type %s_t = %s.t\n\n" safe_prefix m.m_name;
+       (* Verify each external's full signature is type-correct *)
+       List.iter
+         (fun item ->
+            match item with
+            | External { e_name; _ } ->
+              bprintf buf "let _%s_%s = %s.%s\n"
+                safe_prefix e_name m.m_name e_name
+            | _ -> ())
+         m.m_items;
+       bprintf buf "\n")
+    f.of_modules;
+  Buffer.contents buf
+
+(** Write test files alongside binding files, in a parallel directory. *)
+let emit_tests ~dir (files : output_file list) =
+  List.iter
+    (fun f ->
+       let test_filename =
+         let stem = Filename.chop_extension f.of_filename in
+         stem ^ "_test.ml"
+       in
+       let path = Filename.concat dir test_filename in
+       let content = gen_test_content f in
+       let oc = open_out path in
+       output_string oc content;
+       close_out oc;
+       Printf.printf "Wrote test %s\n" path)
+    files

@@ -1,0 +1,3 @@
+(melange.emit
+ (target test_output)
+ (libraries cf_workers_bindings))
