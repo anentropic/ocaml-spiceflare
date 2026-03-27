@@ -547,6 +547,7 @@ let transform_decl env ~current_module (d : decl) : ocaml_module option * item l
   | Variable -> (None, transform_global_variable env ~current_module d)
 
 let transform_module_group env (mg : Ir.module_group) : output_file =
+  let sorted_decls = Sort.sort_declarations mg.mg_declarations in
   let modules = ref [] in
   let toplevel = ref [] in
   List.iter
@@ -556,7 +557,7 @@ let transform_module_group env (mg : Ir.module_group) : output_file =
         | Some m -> modules := m :: !modules
         | None -> ());
        toplevel := items @ !toplevel)
-    mg.mg_declarations;
+    sorted_decls;
   {
     of_filename = mg.mg_name ^ ".ml";
     of_header =
