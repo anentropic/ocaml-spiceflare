@@ -45,12 +45,11 @@ Plans:
   1. `dune build -p spiceflare` succeeds and produces only the Melange bindings library (no codegen dependencies in the solve)
   2. `dune build -p spiceflare-codegen` succeeds and produces the generator tool independently
   3. Both opam files pass `opam lint` with no errors and contain all required metadata fields (authors, homepage, source, bug-reports, license, doc)
-  4. `spiceflare` declares `ocaml >= 5.4 & < 5.5` and `melange >= 6.0.1`; `spiceflare-codegen` declares `ocaml >= 5.4`
-**Plans**: TBD
+  4. `spiceflare` declares `ocaml >= 5.4` and `melange >= 6.0.1`; `spiceflare-codegen` declares `ocaml >= 5.4` (no upper bound on OCaml per user decision)
+**Plans:** 1 plan
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
+- [ ] 02-01-PLAN.md -- Two-package dune-project restructure, dune stanza attribution, opam metadata, and independent build verification
 
 ### Phase 3: CI and Testing
 **Goal**: CI verifies both packages build and test cleanly on every push, and the automated types-update workflow works with the new two-package structure
@@ -121,7 +120,7 @@ Note: Phase 4 and Phase 5 can execute in parallel after their dependencies are m
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Compilable Bindings | 0/3 | Not started | - |
-| 2. Two-Package Restructure | 0/2 | Not started | - |
+| 2. Two-Package Restructure | 0/1 | Not started | - |
 | 3. CI and Testing | 0/2 | Not started | - |
 | 4. Documentation | 0/3 | Not started | - |
 | 5. Demo Worker | 0/2 | Not started | - |
