@@ -1,0 +1,3 @@
+(library
+ (name spiceflare_lib)
+ (libraries yojson))
