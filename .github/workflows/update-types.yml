@@ -1,0 +1,134 @@
+name: Update Workers Types
+
+on:
+  schedule:
+    - cron: '17 9 * * 1'
+  workflow_dispatch: {}
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.4.x
+          dune-cache: true
+      - run: opam install . --deps-only
+
+      - name: Fetch @cloudflare/workers-types
+        working-directory: extract
+        run: |
+          npm ci
+          npm pack @cloudflare/workers-types
+          tar xf cloudflare-workers-types-*.tgz
+
+      - name: Extract IR
+        id: extract
+        working-directory: extract
+        continue-on-error: true
+        run: npm run extract -- package/index.d.ts ../data/workers-ir.json.new
+
+      - name: Check for changes
+        if: steps.extract.outcome == 'success'
+        id: diff
+        run: |
+          if diff -q data/workers-ir.json data/workers-ir.json.new >/dev/null 2>&1; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            mv data/workers-ir.json.new data/workers-ir.json
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Regenerate bindings
+        if: steps.extract.outcome == 'success' && steps.diff.outputs.changed == 'true'
+        id: codegen
+        continue-on-error: true
+        run: |
+          opam exec -- dune build
+          opam exec -- dune exec spiceflare-codegen -- \
+            data/workers-ir.json output/cf_workers_bindings/
+
+      - name: Sync version
+        if: steps.extract.outcome == 'success' && steps.codegen.outcome == 'success' && steps.diff.outputs.changed == 'true'
+        run: |
+          CF_VERSION=$(node -p "require('./extract/package/package.json').version")
+          sed -i "s/(version .*)/(version $CF_VERSION)/" dune-project
+
+      - name: Create Pull Request
+        if: steps.extract.outcome == 'success' && steps.codegen.outcome == 'success' && steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: auto/update-workers-types
+          title: 'chore: update Workers API bindings'
+          body: |
+            Automated update from latest `@cloudflare/workers-types`.
+            Review the diff in `output/cf_workers_bindings/` for API surface changes.
+            Check `output/cf_workers_bindings_test/` for updated compile-checking tests.
+            New declarations auto-grouped by prefix — check `data/workers-ir.json` for module assignments.
+          commit-message: 'chore: regenerate bindings from latest workers-types'
+
+      # -- Failure path: open a PR with partial state so Copilot can investigate --
+
+      - name: Capture failure logs
+        if: steps.extract.outcome == 'failure' || steps.codegen.outcome == 'failure'
+        run: |
+          mkdir -p .failure
+          echo "## Failure context" > .failure/FAILURE.md
+          echo "" >> .failure/FAILURE.md
+          echo "**Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" >> .failure/FAILURE.md
+          echo "**Date:** $(date -u)" >> .failure/FAILURE.md
+          echo "" >> .failure/FAILURE.md
+
+          if [ "${{ steps.extract.outcome }}" = "failure" ]; then
+            echo "### Extract IR failed" >> .failure/FAILURE.md
+            echo "" >> .failure/FAILURE.md
+            echo "The ts-morph extraction script crashed while processing \`index.d.ts\`." >> .failure/FAILURE.md
+            echo "This usually means Cloudflare introduced a TypeScript construct that \`extract/extract.ts\` doesn't handle." >> .failure/FAILURE.md
+          fi
+
+          if [ "${{ steps.codegen.outcome }}" = "failure" ]; then
+            echo "### Regenerate bindings failed" >> .failure/FAILURE.md
+            echo "" >> .failure/FAILURE.md
+            echo "The OCaml codegen crashed while processing \`data/workers-ir.json\`." >> .failure/FAILURE.md
+            echo "This usually means the IR contains a shape that \`lib/transform.ml\` or \`lib/emit.ml\` doesn't handle." >> .failure/FAILURE.md
+          fi
+
+          echo "" >> .failure/FAILURE.md
+          echo "### workers-types version" >> .failure/FAILURE.md
+          echo "" >> .failure/FAILURE.md
+          if [ -f extract/package/package.json ]; then
+            echo '```' >> .failure/FAILURE.md
+            cat extract/package/package.json >> .failure/FAILURE.md
+            echo '```' >> .failure/FAILURE.md
+          fi
+
+          # Include partial IR if extraction succeeded but codegen failed
+          if [ "${{ steps.extract.outcome }}" = "success" ] && [ -f data/workers-ir.json ]; then
+            echo "" >> .failure/FAILURE.md
+            echo "### IR diff (partial)" >> .failure/FAILURE.md
+            echo "" >> .failure/FAILURE.md
+            echo '```diff' >> .failure/FAILURE.md
+            git diff data/workers-ir.json | head -200 >> .failure/FAILURE.md
+            echo '```' >> .failure/FAILURE.md
+          fi
+
+      - name: Open failure PR
+        if: steps.extract.outcome == 'failure' || steps.codegen.outcome == 'failure'
+        uses: peter-evans/create-pull-request@v8
+        with:
+          branch: auto/update-workers-types-failure
+          title: 'fix: workers-types update failed — codegen needs attention'
+          add-paths: |
+            data/
+            .failure/
+          body: |
+            The scheduled workers-types update failed. See `.failure/FAILURE.md` for context and the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for full logs.
+
+            @copilot investigate the failure and fix the extraction or codegen so that the latest `@cloudflare/workers-types` can be processed. Start by reading `.failure/FAILURE.md`, then check the workflow logs linked above.
+          commit-message: 'fix: capture workers-types update failure context'
+          labels: bug

@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        package: [spiceflare, spiceflare-codegen]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.4.x
+          dune-cache: true
+      - run: opam install . --deps-only --with-test
+      - run: opam exec -- dune build -p ${{ matrix.package }}
+      - run: opam exec -- dune runtest -p ${{ matrix.package }}
+
+  melange-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: 5.4.x
+          dune-cache: true
+      - run: opam install . --deps-only
+      - run: opam exec -- dune build @melange
