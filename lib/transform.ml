@@ -151,6 +151,37 @@ and classify_union members =
   else
     `Fallback
 
+(* ── Bind module helpers ─────────────────────────────────────────────── *)
+
+(** Derive a Bind constructor name from a union member type *)
+let bind_constructor_name (t : Ir.typ) =
+  match t with
+  | Ref { name; _ } ->
+    "of_" ^ Naming.to_snake_case name
+  | Array _ -> "of_array"
+  | String_literal s -> "of_" ^ Naming.to_snake_case s
+  | _ -> "of_value"
+
+(** Check if a type is a Bind-eligible union in input position.
+    Returns Some (non_null_members, has_null) if so. *)
+let detect_bind_union (t : Ir.typ) =
+  match t with
+  | Union members ->
+    let non_null =
+      List.filter
+        (fun m ->
+           match m with
+           | Ref { name = "null" | "undefined"; _ } -> false
+           | _ -> true)
+        members
+    in
+    let has_null = List.length non_null < List.length members in
+    if List.length non_null >= 2 && List.length non_null <= 5 then
+      Some (non_null, has_null)
+    else
+      None
+  | _ -> None
+
 (* ── Method/property transforms ──────────────────────────────────────── *)
 
 (** Transform an IR parameter to a binding arrow parameter *)
@@ -163,12 +194,38 @@ let transform_param env ~current_module ~type_params (p : Ir.param) : arrow_para
   else
     labelled_param (Naming.ocaml_name_of_member p.p_name) t
 
-(** Build external decl for an instance method overload *)
+(** Build external decl for an instance method overload.
+    Returns the external_decl and any Bind modules generated for
+    heterogeneous input union parameters. *)
 let transform_method_overload env ~current_module ~type_params ~ocaml_name ~js_name ~self_type
-    ~source_module ~is_static (ov : method_overload) ~has_rest : external_decl =
+    ~source_module ~is_static (ov : method_overload) ~has_rest : external_decl * bind_module list =
   let method_type_params = ov.mo_type_params @ type_params in
+  let bind_modules = ref [] in
   let params =
-    List.map (transform_param env ~current_module ~type_params:method_type_params) ov.mo_params
+    List.map (fun (p : Ir.param) ->
+      match detect_bind_union p.p_type with
+      | Some (non_null, has_null) ->
+        let bm_name =
+          let base = Naming.to_snake_case p.p_name in
+          String.capitalize_ascii base ^ "_Bind"
+        in
+        let constructors =
+          List.map (fun m ->
+            let typ = map_type env ~current_module ~type_params:method_type_params m in
+            let name = bind_constructor_name m in
+            (name, typ))
+          non_null
+        in
+        let bm = { bm_name; bm_constructors = constructors; bm_has_null = has_null } in
+        bind_modules := bm :: !bind_modules;
+        let ocaml_pname = Naming.ocaml_name_of_member p.p_name in
+        if p.p_optional then
+          optional_param ocaml_pname (Tname (bm_name ^ ".t"))
+        else
+          labelled_param ocaml_pname (Tname (bm_name ^ ".t"))
+      | None ->
+        transform_param env ~current_module ~type_params:method_type_params p)
+    ov.mo_params
   in
   let return = map_type env ~current_module ~type_params:method_type_params ov.mo_return_type in
   let params, attrs =
@@ -199,13 +256,13 @@ let transform_method_overload env ~current_module ~type_params ~ocaml_name ~js_n
     | [ p ] when p.ap_mel_this -> [ positional_param Tunit; p ]
     | _ -> params
   in
-  {
+  ({
     e_name = ocaml_name;
     e_js_name = js_name;
     e_type = make_arrow params return;
     e_attrs = attrs;
     e_doc = None;
-  }
+  }, List.rev !bind_modules)
 
 (** Disambiguate overloaded method names *)
 let disambiguate_overloads name overloads =
@@ -279,20 +336,32 @@ let transform_member env ~current_module ~type_params ~self_type ~source_module 
     [] (* Constructors handled separately *)
   | Method { name; overloads; is_static; doc } ->
     let named_overloads = disambiguate_overloads name overloads in
-    List.map
-      (fun (ocaml_name, ov) ->
-         let has_rest =
-           List.exists (fun (p : Ir.param) -> p.p_rest) ov.mo_params
-         in
-         External
-           (transform_method_overload env ~current_module ~type_params ~ocaml_name ~js_name:name
-              ~self_type ~source_module ~is_static ov ~has_rest))
-      named_overloads
-    |> (fun items ->
-          match items, doc with
-          | (External e) :: rest, Some d ->
-            External { e with e_doc = Some d } :: rest
-          | _ -> items)
+    let items =
+      List.concat_map
+        (fun (ocaml_name, ov) ->
+           let has_rest =
+             List.exists (fun (p : Ir.param) -> p.p_rest) ov.mo_params
+           in
+           let ext, binds =
+             transform_method_overload env ~current_module ~type_params ~ocaml_name ~js_name:name
+               ~self_type ~source_module ~is_static ov ~has_rest
+           in
+           List.map (fun bm -> Bind bm) binds @ [ External ext ])
+        named_overloads
+    in
+    (* Attach doc to first External *)
+    (match items, doc with
+     | _, None -> items
+     | _, Some d ->
+       let found = ref false in
+       List.map
+         (fun item ->
+            match item with
+            | External e when not !found ->
+              found := true;
+              External { e with e_doc = Some d }
+            | other -> other)
+         items)
 
 (* ── Constructor transform ───────────────────────────────────────────── *)
 
@@ -306,10 +375,36 @@ let find_constructor (members : Ir.member list) =
 
 let transform_constructor env ~current_module ~type_params ~class_name ~source_module overloads : item list =
   let named = disambiguate_overloads "make" overloads in
-  List.map
+  List.concat_map
     (fun (ocaml_name, (ov : method_overload)) ->
        let method_type_params = ov.mo_type_params @ type_params in
-       let params = List.map (transform_param env ~current_module ~type_params:method_type_params) ov.mo_params in
+       let bind_modules = ref [] in
+       let params =
+         List.map (fun (p : Ir.param) ->
+           match detect_bind_union p.p_type with
+           | Some (non_null, has_null) ->
+             let bm_name =
+               let base = Naming.to_snake_case p.p_name in
+               String.capitalize_ascii base ^ "_Bind"
+             in
+             let constructors =
+               List.map (fun m ->
+                 let typ = map_type env ~current_module ~type_params:method_type_params m in
+                 let name = bind_constructor_name m in
+                 (name, typ))
+               non_null
+             in
+             let bm = { bm_name; bm_constructors = constructors; bm_has_null = has_null } in
+             bind_modules := bm :: !bind_modules;
+             let ocaml_pname = Naming.ocaml_name_of_member p.p_name in
+             if p.p_optional then
+               optional_param ocaml_pname (Tname (bm_name ^ ".t"))
+             else
+               labelled_param ocaml_pname (Tname (bm_name ^ ".t"))
+           | None ->
+             transform_param env ~current_module ~type_params:method_type_params p)
+         ov.mo_params
+       in
        let params =
          if params = [] then [ positional_param Tunit ] else params
        in
@@ -319,14 +414,16 @@ let transform_constructor env ~current_module ~type_params ~class_name ~source_m
              | Some m -> [ Mel_module m ]
              | None -> [])
        in
-       External
-         {
-           e_name = ocaml_name;
-           e_js_name = class_name;
-           e_type = make_arrow params (Tname "t");
-           e_attrs = attrs;
-           e_doc = None;
-         })
+       let binds = List.rev !bind_modules in
+       List.map (fun bm -> Bind bm) binds @
+       [ External
+           {
+             e_name = ocaml_name;
+             e_js_name = class_name;
+             e_type = make_arrow params (Tname "t");
+             e_attrs = attrs;
+             e_doc = None;
+           } ])
     named
 
 (* ── Class transform ─────────────────────────────────────────────────── *)
