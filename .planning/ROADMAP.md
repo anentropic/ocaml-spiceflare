@@ -30,12 +30,12 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Codegen emits a test file per module that calls each external with correctly-typed arguments, and `dune build @runtest` passes for the test suite
   3. Subclass values can be used at supertype positions in OCaml without manual casting (inheritance chains emit `type t = SuperModule.t`)
   4. Heterogeneous input unions in binding parameters use typed `Bind` smart constructors instead of `'a Js.t`
-**Plans**: TBD
+**Plans:** 3 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md -- Core codegen fixes: cross-module type qualification, type parameter threading, forward-reference topo sort, stream type resolution
+- [ ] 01-02-PLAN.md -- Inheritance aliases (BIND-03) and Bind module generation (BIND-02)
+- [ ] 01-03-PLAN.md -- Melange infrastructure activation, test suite emission, regeneration, and compile verification
 
 ### Phase 2: Two-Package Restructure
 **Goal**: Repo contains two independent opam packages with correct metadata so consumers can install bindings without pulling in codegen dependencies
