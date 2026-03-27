@@ -59,11 +59,11 @@ Plans:
   1. GitHub Actions runs `dune build -p spiceflare` and `dune build -p spiceflare-codegen` on OCaml 5.4 on every push, and both pass
   2. The `update-types.yml` workflow regenerates bindings and the compile-checking test suite, and opens a PR when the CF Workers API changes
   3. CI failure on binding compile regression blocks merge (status check required)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
+- [ ] 03-01-PLAN.md -- Update ci.yml (matrix strategy, melange-check job, OCaml 5.4) and update-types.yml (binary rename, OCaml 5.4, peter-evans v8)
+- [ ] 03-02-PLAN.md -- Configure branch protection on main via gh api (three required status checks)
 
 ### Phase 4: Documentation
 **Goal**: Consumers can install and use the bindings from README instructions alone, contributors can extend the codegen from DEVELOP.md, and API docs are published
