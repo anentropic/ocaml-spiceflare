@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase complete — ready for verification
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-03-27T10:40:43.702Z"
+status: Ready to execute
+stopped_at: Completed 03-ci-and-testing-01-PLAN.md
+last_updated: "2026-03-27T14:24:10.086Z"
 progress:
   total_phases: 6
   completed_phases: 1
-  total_plans: 4
-  completed_plans: 3
+  total_plans: 6
+  completed_plans: 4
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-26)
 
 **Core value:** Consumers get up-to-date, idiomatic Melange bindings for the entire CF Workers API without hand-authoring or maintaining them
-**Current focus:** Phase 02 — two-package-restructure
+**Current focus:** Phase 03 — ci-and-testing
 
 ## Current Position
 
-Phase: 02 (two-package-restructure) — EXECUTING
-Plan: 1 of 1
+Phase: 03 (ci-and-testing) — EXECUTING
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Plan: 1 of 1
 | Phase 01-compilable-bindings P01 | 7min | 2 tasks | 5 files |
 | Phase 01-compilable-bindings P02 | 4min | 2 tasks | 3 files |
 | Phase 02-two-package-restructure P01 | 10 | 2 tasks | 7 files |
+| Phase 03-ci-and-testing P01 | 5 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Phase 02-two-package-restructure]: public_name on cf_workers_bindings implies package membership -- explicit (package ...) causes dune error
 - [Phase 02-two-package-restructure]: Binary renamed from spiceflare to spiceflare-codegen via public_name change in bin/dune
 - [Phase 02-two-package-restructure]: OCaml constraint is open-ended (>= 5.4) with no upper bound on both packages per user decision
+- [Phase 03-ci-and-testing]: Matrix CI strategy chosen for parallel spiceflare and spiceflare-codegen package builds
+- [Phase 03-ci-and-testing]: melange-check separated into standalone job (not folded into build matrix)
+- [Phase 03-ci-and-testing]: Upgraded peter-evans/create-pull-request from v6 to v8 in update-types workflow
 
 ### Pending Todos
 
@@ -81,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T10:40:43.696Z
-Stopped at: Completed 02-01-PLAN.md
+Last session: 2026-03-27T14:24:10.049Z
+Stopped at: Completed 03-ci-and-testing-01-PLAN.md
 Resume file: None

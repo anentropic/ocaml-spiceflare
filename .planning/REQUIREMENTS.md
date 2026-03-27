@@ -22,7 +22,7 @@
 ### Testing (TEST)
 
 - [ ] **TEST-01**: Codegen emits a compile-checking test suite alongside the bindings — one test file per module that calls each external with correctly-typed arguments, verifying cross-module type resolution under Melange
-- [ ] **TEST-02**: CI runs `dune build -p spiceflare` and `dune build -p spiceflare-codegen` on OCaml 5.4 in GitHub Actions, and both pass
+- [x] **TEST-02**: CI runs `dune build -p spiceflare` and `dune build -p spiceflare-codegen` on OCaml 5.4 in GitHub Actions, and both pass
 
 ### Documentation (DOCS)
 
@@ -38,7 +38,7 @@
 ### Release (REL)
 
 - [ ] **REL-01**: GitHub Actions release workflow triggers on semver git tag, runs `dune-release` to produce a tarball, GitHub Release, and opam-repository PR for both packages
-- [ ] **REL-02**: `update-types.yml` CI workflow is updated to reflect the new two-package structure, regenerate both the bindings and the compile-checking test suite, and open a PR when the CF Workers API changes
+- [x] **REL-02**: `update-types.yml` CI workflow is updated to reflect the new two-package structure, regenerate both the bindings and the compile-checking test suite, and open a PR when the CF Workers API changes
 - [ ] **REL-03**: Both `spiceflare` and `spiceflare-codegen` are submitted to `ocaml/opam-repository` via the first release
 
 ## v2 Requirements
@@ -74,14 +74,14 @@
 | PKG-04 | Phase 4 | Pending |
 | PKG-05 | Phase 2 | Complete |
 | TEST-01 | Phase 1 | Pending |
-| TEST-02 | Phase 3 | Pending |
+| TEST-02 | Phase 3 | Complete |
 | DOCS-01 | Phase 4 | Pending |
 | DOCS-02 | Phase 4 | Pending |
 | DOCS-03 | Phase 4 | Pending |
 | DEMO-01 | Phase 5 | Pending |
 | DEMO-02 | Phase 5 | Pending |
 | REL-01 | Phase 6 | Pending |
-| REL-02 | Phase 3 | Pending |
+| REL-02 | Phase 3 | Complete |
 | REL-03 | Phase 6 | Pending |
 
 **Coverage:**
