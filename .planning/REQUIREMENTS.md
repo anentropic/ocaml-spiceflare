@@ -14,10 +14,10 @@
 ### Package Setup (PKG)
 
 - [ ] **PKG-01**: Bindings library `dune` stanza is activated (uncommented) and `dune-project` includes `(using melange 0.1)` — bindings build with `dune build -p spiceflare`
-- [ ] **PKG-02**: Repo contains two separate opam packages: `spiceflare` (generated Melange bindings) and `spiceflare-codegen` (generator tool), with disjoint dependency trees
-- [ ] **PKG-03**: Both opam files have complete metadata: `authors`, `homepage`, `source`, `bug-reports`, `license`, `doc` fields populated
+- [x] **PKG-02**: Repo contains two separate opam packages: `spiceflare` (generated Melange bindings) and `spiceflare-codegen` (generator tool), with disjoint dependency trees
+- [x] **PKG-03**: Both opam files have complete metadata: `authors`, `homepage`, `source`, `bug-reports`, `license`, `doc` fields populated
 - [ ] **PKG-04**: `CHANGES.md` exists with initial release entry in dune-release-compatible format
-- [ ] **PKG-05**: `spiceflare` package constrains `ocaml >= 5.4 & < 5.5` and `melange >= 6.0.1`; `spiceflare-codegen` constrains `ocaml >= 5.4`
+- [x] **PKG-05**: `spiceflare` package constrains `ocaml >= 5.4 & < 5.5` and `melange >= 6.0.1`; `spiceflare-codegen` constrains `ocaml >= 5.4`
 
 ### Testing (TEST)
 
@@ -69,10 +69,10 @@
 | BIND-02 | Phase 1 | Complete |
 | BIND-03 | Phase 1 | Complete |
 | PKG-01 | Phase 1 | Pending |
-| PKG-02 | Phase 2 | Pending |
-| PKG-03 | Phase 2 | Pending |
+| PKG-02 | Phase 2 | Complete |
+| PKG-03 | Phase 2 | Complete |
 | PKG-04 | Phase 4 | Pending |
-| PKG-05 | Phase 2 | Pending |
+| PKG-05 | Phase 2 | Complete |
 | TEST-01 | Phase 1 | Pending |
 | TEST-02 | Phase 3 | Pending |
 | DOCS-01 | Phase 4 | Pending |

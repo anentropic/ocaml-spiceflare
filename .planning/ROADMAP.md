@@ -49,7 +49,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md -- Two-package dune-project restructure, dune stanza attribution, opam metadata, and independent build verification
+- [x] 02-01-PLAN.md -- Two-package dune-project restructure, dune stanza attribution, opam metadata, and independent build verification
 
 ### Phase 3: CI and Testing
 **Goal**: CI verifies both packages build and test cleanly on every push, and the automated types-update workflow works with the new two-package structure
