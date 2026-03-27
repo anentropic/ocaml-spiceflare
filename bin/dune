@@ -1,4 +1,5 @@
 (executable
  (name main)
- (public_name spiceflare)
+ (public_name spiceflare-codegen)
+ (package spiceflare-codegen)
  (libraries spiceflare_lib))

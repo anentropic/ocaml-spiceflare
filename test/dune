@@ -1,3 +1,4 @@
 (test
  (name test_all)
+ (package spiceflare-codegen)
  (libraries spiceflare_lib alcotest))

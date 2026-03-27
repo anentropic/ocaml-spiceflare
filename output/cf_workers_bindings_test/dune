@@ -1,3 +1,6 @@
 (melange.emit
  (target test_output)
- (libraries cf_workers_bindings))
+ (package spiceflare)
+ (libraries cf_workers_bindings)
+ (preprocess
+  (pps melange.ppx)))

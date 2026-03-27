@@ -1,3 +1,4 @@
 (library
  (name spiceflare_lib)
+ (package spiceflare-codegen)
  (libraries yojson))
