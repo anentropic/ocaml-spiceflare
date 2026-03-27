@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 01-01-PLAN.md
-last_updated: "2026-03-27T00:42:05.165Z"
+stopped_at: Completed 01-02-PLAN.md
+last_updated: "2026-03-27T00:49:12.308Z"
 progress:
   total_phases: 6
   completed_phases: 0
   total_plans: 3
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-03-26)
 ## Current Position
 
 Phase: 01 (compilable-bindings) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
@@ -47,6 +47,7 @@ Plan: 2 of 3
 
 *Updated after each plan completion*
 | Phase 01-compilable-bindings P01 | 7min | 2 tasks | 5 files |
+| Phase 01-compilable-bindings P02 | 4min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -61,6 +62,8 @@ Recent decisions affecting current work:
 - [Phase 01-compilable-bindings]: Used String.capitalize_ascii for dune file module names (not Naming.module_name_of) to match dune single-capitalize convention
 - [Phase 01-compilable-bindings]: Type params checked before is_known_decl in map_type to prevent generic parameters from misresolving as declarations
 - [Phase 01-compilable-bindings]: Topological sort cycles broken arbitrarily with stderr warning -- no OCaml mutual recursion support yet
+- [Phase 01-compilable-bindings]: Alias emission excludes extends Error (Js.Exn.t) and extends Record (TS utility type)
+- [Phase 01-compilable-bindings]: Bind detection at param transform sites (not map_type) keeps type mapping position-agnostic
 
 ### Pending Todos
 
@@ -74,6 +77,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T00:42:05.162Z
-Stopped at: Completed 01-01-PLAN.md
+Last session: 2026-03-27T00:49:12.304Z
+Stopped at: Completed 01-02-PLAN.md
 Resume file: None

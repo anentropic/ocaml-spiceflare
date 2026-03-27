@@ -8,8 +8,8 @@
 ### Binding Fixes (BIND)
 
 - [x] **BIND-01**: Generated bindings compile in a Melange project — `ReadableStream` and `WritableStream` references are qualified to their correct module paths
-- [ ] **BIND-02**: Heterogeneous input unions emit `Bind` modules with typed smart constructors (complete `transform.ml` to emit what `binding_ast.ml` and `emit.ml` already support)
-- [ ] **BIND-03**: Single-inheritance class chains emit `type t = SuperModule.t` so OCaml consumers can use subclass values at supertype positions without manual casting
+- [x] **BIND-02**: Heterogeneous input unions emit `Bind` modules with typed smart constructors (complete `transform.ml` to emit what `binding_ast.ml` and `emit.ml` already support)
+- [x] **BIND-03**: Single-inheritance class chains emit `type t = SuperModule.t` so OCaml consumers can use subclass values at supertype positions without manual casting
 
 ### Package Setup (PKG)
 
@@ -66,8 +66,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | BIND-01 | Phase 1 | Complete |
-| BIND-02 | Phase 1 | Pending |
-| BIND-03 | Phase 1 | Pending |
+| BIND-02 | Phase 1 | Complete |
+| BIND-03 | Phase 1 | Complete |
 | PKG-01 | Phase 1 | Pending |
 | PKG-02 | Phase 2 | Pending |
 | PKG-03 | Phase 2 | Pending |
