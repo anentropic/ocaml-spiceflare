@@ -1,7 +1,6 @@
 (library
  (name cf_workers_bindings)
  (public_name spiceflare)
- (package spiceflare)
  (modes melange)
  (preprocess
   (pps melange.ppx))
