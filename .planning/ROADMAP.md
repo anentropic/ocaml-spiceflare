@@ -63,7 +63,7 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md -- Update ci.yml (matrix strategy, melange-check job, OCaml 5.4) and update-types.yml (binary rename, OCaml 5.4, peter-evans v8)
-- [ ] 03-02-PLAN.md -- Configure branch protection on main via gh api (three required status checks)
+- [x] 03-02-PLAN.md -- Configure branch protection on main via gh api (three required status checks)
 
 ### Phase 4: Documentation
 **Goal**: Consumers can install and use the bindings from README instructions alone, contributors can extend the codegen from DEVELOP.md, and API docs are published
